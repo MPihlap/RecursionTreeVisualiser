@@ -5,6 +5,7 @@ from typing import Callable
 
 class function_info:
     def __init__(self, func_name: str, node: anytree.Node, parent_function):
+
         self.func_name = func_name
         self.func_args = {}
         self.return_value = None
@@ -38,6 +39,7 @@ class recursion_tree_visualizer:
         self.run_function(observable_function, args)
 
     def run_function(self, function, params: list):
+        print("Running function: " + function.__name__)
         sys.settrace(self.trace_functions)
         function(*params)
 
@@ -45,8 +47,10 @@ class recursion_tree_visualizer:
         co = frame.f_code
         locals = frame.f_locals
         func_name = co.co_name
+        #print("builtins: "+str(frame.f_builtins.keys()))
+        #if func_name != self.observed_function_name:  # Only trace the function we actually care about
 
-        if func_name != self.observed_function_name:  # Only trace the function we actually care about
+        if frame.f_builtins.get(func_name) != None:  # Only trace the function we actually care about
             return
         if event == "call":
             self.nodes_amount += 1
@@ -91,6 +95,15 @@ def rek(n, m):
         return 0
     return n + rek(n - 1, m)
 
+def a(n):
+    if n < 1:
+        return
+    b(n-1)
+
+def b(n):
+    a(n-1)
+
 
 recursion_tree_visualizer(peegelda, [(("a", "b"), ("c", "d"))])
 recursion_tree_visualizer(rek, [5, 6])
+recursion_tree_visualizer(a, [5])
